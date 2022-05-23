@@ -29,26 +29,50 @@ int getFileData(t_fileData *fileData, char *name) {
     return (1);
 }
 
-int printSymbols(t_fileData *fileData) {
+int getSymbols(t_fileData *fileData) {
     char *strtab;
     Elf64_Sym *symbols;
     Elf64_Shdr section;
     int n;
     int size;
+    int m;
 
     section = getShHead(fileData, ".strtab");
     strtab = (void*)fileData->head + section.sh_offset;
     section = getShHead(fileData, ".symtab");
     symbols = (void*)fileData->head + section.sh_offset;
     size = section.sh_size / sizeof(Elf64_Sym);
+    m = 0;
+    n = -1;
+    while (++n < size)
+        if (symbols[n].st_name && symbols[n].st_info != 4)
+            m++;
+    fileData->symbols_nb = m;
+    if (!(fileData->symbols = malloc(sizeof(t_sym) * fileData->symbols_nb)))
+        return (0);
+    m = 0;
     n = -1;
     while (++n < size) {
-        if (symbols[n].st_name) {
-            write(1, &strtab[symbols[n].st_name], ft_strlen(&strtab[symbols[n].st_name]));
-            write(1, "\n", 1);
+        if (symbols[n].st_name && symbols[n].st_info != 4) {
+            fileData->symbols[m].name = &strtab[symbols[n].st_name];
+            fileData->symbols[m].info = symbols[n].st_info;
+            fileData->symbols[m].value = symbols[n].st_value;
+            m++;
         }
     }
     return (1);
+}
+
+void printSymbols(t_fileData *fileData) {
+    int n;
+
+    n = -1;
+    while (++n < fileData->symbols_nb) {
+        if (fileData->symbols[n].value)
+            printf("%016x %2d %s\n", fileData->symbols[n].value, fileData->symbols[n].info, fileData->symbols[n].name);
+        else
+            printf("                 %2d %s\n", fileData->symbols[n].info, fileData->symbols[n].name);
+    }
 }
 
 int main(int ac, char **av) {
@@ -58,8 +82,13 @@ int main(int ac, char **av) {
         write(2, "Wrong numbers of arguments\n", 27);
         return (1);
     }
+    ft_bzero(&fileData, sizeof(fileData));
     if (!getFileData(&fileData, av[1]))
         return (1);
+    getSymbols(&fileData);
+    ft_quicksort(fileData.symbols, fileData.symbols_nb);
     printSymbols(&fileData);
+    free(fileData.symbols);
+    munmap(fileData.head, fileData.fileSize);
     return (0);
 }
