@@ -55,13 +55,57 @@ int getSymbols(t_fileData *fileData) {
     while (++n < size) {
         if (symbols[n].st_name && symbols[n].st_info != 4) {
             fileData->symbols[m].name = &strtab[symbols[n].st_name];
-            fileData->symbols[m].info = symbols[n].st_info;
+            fileData->symbols[m].bind = ELF64_ST_BIND(symbols[n].st_info);
+            fileData->symbols[m].type = ELF64_ST_TYPE(symbols[n].st_info);
             fileData->symbols[m].value = symbols[n].st_value;
+            fileData->symbols[m].section = &fileData->ShStrTab[fileData->shead[symbols[n].st_shndx].sh_name];
             m++;
         }
     }
     return (1);
 }
+
+char getSymbolChar(t_sym symbol) {
+  //  printf("section = %5s, bind = %d, type = %d\n", symbol.section, symbol.bind, symbol.type);
+    if (symbol.bind == STB_WEAK) {
+        if (symbol.value)
+            return ('W');
+        return ('w');
+    }
+    if (!ft_strcmp(symbol.section, ".bss")) {
+        if (symbol.bind == STB_GLOBAL)
+            return ('B');
+        return ('b');
+    }
+    if (!ft_strcmp(symbol.section, ".data") || !ft_strcmp(symbol.section, ".jcr")) {
+        if (symbol.bind == STB_GLOBAL)
+            return ('D');
+        return ('d');
+    }
+    if (!ft_strcmp(symbol.section, ".rodata") || !ft_strcmp(symbol.section, ".eh_frame") || !ft_strcmp(symbol.section, ".eh_frame_hdr")) {
+        if (symbol.bind == STB_GLOBAL)
+            return ('R');
+        return ('r');
+    }
+    if (!ft_strcmp(symbol.section, ".dynamic") || !ft_strcmp(symbol.section, ".got.plt")) {
+        if (symbol.bind == STB_GLOBAL)
+            return ('D');
+        return ('d');
+    }
+    if (!ft_strcmp(symbol.section, ".text") || !ft_strcmp(symbol.section, ".init_array") || !ft_strcmp(symbol.section, ".fini_array") || !ft_strcmp(symbol.section, ".init") || !ft_strcmp(symbol.section, ".fini")) {
+        if (symbol.bind == STB_GLOBAL)
+            return ('T');
+        return ('t');
+    }
+    if (symbol.type == STT_COMMON)
+        return ('C');
+    if (symbol.type == STT_NOTYPE || symbol.type < STT_NUM) {
+        if (symbol.bind == STB_GLOBAL)
+            return ('U');
+        return ('u');
+    }
+    return ('?');
+} 
 
 void printSymbols(t_fileData *fileData) {
     int n;
@@ -69,9 +113,9 @@ void printSymbols(t_fileData *fileData) {
     n = -1;
     while (++n < fileData->symbols_nb) {
         if (fileData->symbols[n].value)
-            printf("%016x %2d %s\n", fileData->symbols[n].value, fileData->symbols[n].info, fileData->symbols[n].name);
+            printf("%016x %c %s\n", fileData->symbols[n].value, getSymbolChar(fileData->symbols[n]), fileData->symbols[n].name);
         else
-            printf("                 %2d %s\n", fileData->symbols[n].info, fileData->symbols[n].name);
+            printf("                 %c %s\n", getSymbolChar(fileData->symbols[n]), fileData->symbols[n].name);
     }
 }
 

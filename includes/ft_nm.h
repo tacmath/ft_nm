@@ -23,7 +23,9 @@ typedef struct s_data t_data;
 struct s_sym
 {
     char *name;
-    size_t info;
+    char *section;
+    char   bind;
+    char   type;
     size_t value;
 };
 
