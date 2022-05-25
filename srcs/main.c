@@ -206,7 +206,7 @@ int main(int ac, char **av) {
     if (ac > 2) {
         n = 0;
         while (++n < ac)
-            nmFile(av[1], 1);
+            nmFile(av[n], 1);
     }
     return (0);
 }
