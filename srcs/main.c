@@ -105,17 +105,48 @@ char getSymbolChar(t_sym symbol) {
         return ('u');
     }
     return ('?');
-} 
+}
+
+void printHexNbr(size_t nb) {
+    static char hex[] = "0123456789abcdef";
+
+    if (nb >= 16) {
+        printHexNbr(nb / 16);
+        printHexNbr(nb % 16);
+    }
+    else
+        write(1, hex + nb, 1);
+}
+
+size_t hexNbrLen(size_t nb) {
+    size_t len;
+
+    len = 1;
+    nb /= 16;
+    while(nb) {
+        nb /= 16;
+        len++;
+    }
+    return (len);
+}
 
 void printSymbols(t_fileData *fileData) {
     int n;
+    static char type[] = "   ";
+    static char zeros[] = "0000000000000000";
 
     n = -1;
     while (++n < fileData->symbols_nb) {
-        if (fileData->symbols[n].value)
-            printf("%016x %c %s\n", fileData->symbols[n].value, getSymbolChar(fileData->symbols[n]), fileData->symbols[n].name);
+        if (fileData->symbols[n].value) {
+            write(1, zeros, 16 - hexNbrLen(fileData->symbols[n].value));
+            printHexNbr(fileData->symbols[n].value);
+        }
         else
-            printf("                 %c %s\n", getSymbolChar(fileData->symbols[n]), fileData->symbols[n].name);
+            write(1, "                ", 16);
+        type[1] = getSymbolChar(fileData->symbols[n]);
+        write(1, type, 3);
+        write(1, fileData->symbols[n].name, ft_strlen(fileData->symbols[n].name));
+        write(1, "\n", 1);
     }
 }
 
