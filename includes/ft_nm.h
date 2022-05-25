@@ -10,6 +10,11 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
+#define FT_NM_NAME      "ft_nm"
+#define MAGIC_NUMBER    0x464c457f
+#define ELF64           0
+#define ELF32           1
+
 typedef struct magic_num {
     uint32_t    magic_number;
     uint8_t     support;
@@ -40,6 +45,7 @@ struct s_fileData
     t_sym       *symbols;
     int         symbols_nb;
     char        *ShStrTab;
+    char        type;
 };
 
 typedef struct s_fileData t_fileData;
