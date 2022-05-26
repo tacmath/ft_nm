@@ -22,7 +22,7 @@ INC_PATH= includes/
 
 HEADER=$(INC_PATH)/ft_nm.h
 
-NAME_SRC=main.c \
+NAME_SRC=main.c get_shname.c utils.c print.c 32bits.c
 
 
 
@@ -38,15 +38,15 @@ CC			= gcc
 CFLAGS		= -Wall -Werror -Wextra
 
 
-all: lib $(NAME)
+all: $(NAME)
 
-$(NAME) : $(OBJS) $(LIBFT.A)
+$(NAME) : $(OBJS)
 	@$(CC) $^ -o $@
 	@echo "	\033[2K\r$(DARK_BLUE)$(NAME):\t\t$(GREEN)loaded\033[0m"
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/%.c $(HEADER)
 	@mkdir $(OBJ_PATH) 2> /dev/null || true
-	@$(CC) -I $(INC_PATH) -I $(LIBFT_INC) -c $< -o $@
+	@$(CC) -I $(INC_PATH) -c $< -o $@
 	@$(eval I=$(shell echo $$(($(I)+1))))
 	@printf "\033[2K\r${G}$(DARK_BLUE)>>\t\t\t\t$(I)/$(shell echo $(NAME_SRC_LEN)) ${N}$(BLUE)$<\033[36m \033[0m"
 

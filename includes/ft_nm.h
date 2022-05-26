@@ -42,17 +42,28 @@ struct s_fileData
     size_t      fileSize;
     Elf64_Ehdr  *head;
     Elf64_Shdr  *shead;
+    Elf64_Sym   *symTab;
+    int         symTabSize;
     t_sym       *symbols;
     int         symbols_nb;
     char        *ShStrTab;
+    char        *strTab;
     char        type;
 };
 
 typedef struct s_fileData t_fileData;
 
-Elf64_Shdr  getShHead(t_fileData *fileData, char *name);
+Elf64_Shdr  *getShHead(t_fileData *fileData, char *name);
+Elf32_Shdr  *getShHead32(t_fileData *fileData, char *name);
 void        ft_bzero(void *s, size_t n);
 void		ft_quicksort(t_sym *tab, int len);
 int         ft_strcmp(const char *str1, const char *str2);
+size_t      ft_strlen(const	char *str);
+int         fileErrors(char *preMessage, char *name, char *afterMessage);
+size_t      hexNbrLen(size_t nb);
+char        getSymbolChar(t_sym symbol);
+void        printSymbols(t_fileData *fileData);
+int         getSymbols32(t_fileData *fileData);
+int         checkFileData32(t_fileData *fileData, char *name);
 
 #endif
