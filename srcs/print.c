@@ -69,11 +69,11 @@ void printSymbols(t_fileData *fileData) {
     n = -1;
     while (++n < fileData->symbols_nb) {
         if (fileData->symbols[n].value) {
-            write(1, zeros, 16 - hexNbrLen(fileData->symbols[n].value));
+            write(1, zeros, 8 + (!fileData->type) * 8 - hexNbrLen(fileData->symbols[n].value));
             printHexNbr(fileData->symbols[n].value);
         }
         else
-            write(1, "                ", 16);
+            write(1, "                ", 8 + (!fileData->type) * 8);
         type[1] = getSymbolChar(fileData->symbols[n]);
         write(1, type, 3);
         write(1, fileData->symbols[n].name, ft_strlen(fileData->symbols[n].name));

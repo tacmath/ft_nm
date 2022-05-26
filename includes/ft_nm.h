@@ -36,6 +36,17 @@ struct s_sym
 
 typedef struct s_sym t_sym;
 
+struct s_option
+{
+    char a;
+    char g;
+    char u;
+    char r;
+    char p;
+};
+
+typedef struct s_option t_option;
+
 struct s_fileData
 {
     int         fd;
@@ -57,6 +68,7 @@ Elf64_Shdr  *getShHead(t_fileData *fileData, char *name);
 Elf32_Shdr  *getShHead32(t_fileData *fileData, char *name);
 void        ft_bzero(void *s, size_t n);
 void		ft_quicksort(t_sym *tab, int len);
+void		ft_rquicksort(t_sym *tab, int len);
 int         ft_strcmp(const char *str1, const char *str2);
 size_t      ft_strlen(const	char *str);
 int         fileErrors(char *preMessage, char *name, char *afterMessage);

@@ -64,7 +64,7 @@ int getSymbols(t_fileData *fileData) {
     return (1);
 }
 
-int nmFile(char *name, char mode) {
+int nmFile(char *name, t_option option, char mode) {
     t_fileData fileData;
 
     ft_bzero(&fileData, sizeof(fileData));
@@ -85,26 +85,71 @@ int nmFile(char *name, char mode) {
         write(1, name, ft_strlen(name));
         write(1, ":\n", 2);
     }
-    ft_quicksort(fileData.symbols, fileData.symbols_nb);
+    if (!option.p) {
+        if (option.r)
+            ft_rquicksort(fileData.symbols, fileData.symbols_nb);
+        else
+            ft_quicksort(fileData.symbols, fileData.symbols_nb);
+    }
     printSymbols(&fileData);
     free(fileData.symbols);
     munmap(fileData.head, fileData.fileSize);
     return (1);
 }
 
+void getOption(t_option *option, int ac, char **av) {
+    int n;
+    int m;
+
+    n = 0;
+    while (++n < ac) {
+        if (av[n][0] == '-') {
+            m = 0;
+            while (av[n][++m]) {
+                if (av[n][m] == 'a')
+                    option->a = 1;
+                if (av[n][m] == 'g')
+                    option->g = 1;
+                if (av[n][m] == 'p')
+                    option->p = 1;
+                if (av[n][m] == 'r')
+                    option->r = 1;
+                if (av[n][m] == 'u')
+                    option->u = 1;
+            }
+        }
+    }
+}
+
+int getfilesNb(int ac, char **av) {
+    int n;
+    int nb;
+
+    nb = 0;
+    n = 0;
+    while (++n < ac)
+        if (av[n][0] != '-')
+            nb++;
+    return (nb);
+}
+
 int main(int ac, char **av) {
     int n;
+    int filesNb;
+    t_option option;
 
-    if (ac == 1) {
-        write(2, "Wrong numbers of arguments\n", 27);
-        return (1);
+    ft_bzero(&option, sizeof(option));
+    getOption(&option, ac, av);
+    filesNb = getfilesNb(ac, av);
+    if (!filesNb) {
+        if (!nmFile("a.out", option, 0))
+            return (1);
     }
-    if (ac == 2 && !nmFile(av[1], 0))
-        return (1);
-    if (ac > 2) {
+    else {
         n = 0;
         while (++n < ac)
-            nmFile(av[n], 1);
+            if (av[n][0] != '-') 
+                nmFile(av[n], option, (filesNb != 1));
     }
     return (0);
 }
