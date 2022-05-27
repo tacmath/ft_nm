@@ -19,38 +19,54 @@ void printHexNbr(size_t nb) {
         write(1, hex + nb, 1);
 }
 
+char checkSymbolType(t_sym symbol, char **sections, char global, char local) {
+    int n;
+    
+    n = -1;
+    while (sections[++n]) {
+        if (!ft_strcmp(symbol.section, sections[n])) {
+            if (symbol.bind == STB_GLOBAL)
+                return (global);
+            return (local);
+        }
+    }
+    return (0);
+}
+
 char getSymbolChar(t_sym symbol) {
-  //  printf("section = %5s, bind = %d, type = %d\n", symbol.section, symbol.bind, symbol.type);
+    static char *dataSections[9] = {".data", ".jcr", ".dynamic", ".got", ".got.plt", 0};
+    static char *rdataSections[19] = {".rodata", ".eh_frame", ".eh_frame_hdr", ".dynstr", ".dynsym", ".gnu.hash", ".gnu.version",
+                                        ".gnu.version_r", ".rela.dyn", ".rela.plt", ".note.ABI-tag", ".note.gnu.build-id", ".interp", 
+                                        ".rel.dyn", ".rel.plt", 0};
+    static char *textSections[12] = {".text", ".init_array", ".fini_array", ".init", ".fini", ".plt", ".plt.got", 0};
+    char ret;
+
     if (symbol.bind == STB_WEAK) {
         if (symbol.value)
             return ('W');
         return ('w');
+    }
+    if (symbol.type == STT_FILE) {
+        if (symbol.bind == STB_GLOBAL)
+            return ('A');
+        return ('a');
     }
     if (!ft_strcmp(symbol.section, ".bss")) {
         if (symbol.bind == STB_GLOBAL)
             return ('B');
         return ('b');
     }
-    if (!ft_strcmp(symbol.section, ".data") || !ft_strcmp(symbol.section, ".jcr")) {
+    if (!ft_strcmp(symbol.section, ".comment")) {
         if (symbol.bind == STB_GLOBAL)
-            return ('D');
-        return ('d');
+            return ('N');
+        return ('n');
     }
-    if (!ft_strcmp(symbol.section, ".rodata") || !ft_strcmp(symbol.section, ".eh_frame") || !ft_strcmp(symbol.section, ".eh_frame_hdr")) {
-        if (symbol.bind == STB_GLOBAL)
-            return ('R');
-        return ('r');
-    }
-    if (!ft_strcmp(symbol.section, ".dynamic") || !ft_strcmp(symbol.section, ".got.plt")) {
-        if (symbol.bind == STB_GLOBAL)
-            return ('D');
-        return ('d');
-    }
-    if (!ft_strcmp(symbol.section, ".text") || !ft_strcmp(symbol.section, ".init_array") || !ft_strcmp(symbol.section, ".fini_array") || !ft_strcmp(symbol.section, ".init") || !ft_strcmp(symbol.section, ".fini")) {
-        if (symbol.bind == STB_GLOBAL)
-            return ('T');
-        return ('t');
-    }
+    if ((ret = checkSymbolType(symbol, dataSections, 'D', 'd'))) 
+        return (ret);
+    if ((ret = checkSymbolType(symbol, rdataSections, 'R', 'r'))) 
+        return (ret);
+    if ((ret = checkSymbolType(symbol, textSections, 'T', 't'))) 
+        return (ret);
     if (symbol.type == STT_COMMON)
         return ('C');
     if (!symbol.section[0]/*symbol.type == STT_NOTYPE || symbol.type < STT_NUM*/) {
@@ -68,7 +84,7 @@ void printSymbols(t_fileData *fileData, t_option option) {
 
     n = 0;
     while (++n < fileData->symbols_nb) {
-        if ((option.u && fileData->symbols[n].section[0] || fileData->symbols[n].type == STT_FILE)
+        if ((option.u && (fileData->symbols[n].section[0] || fileData->symbols[n].type == STT_FILE))
             || (!option.a && !option.u && (!fileData->symbols[n].originalName[0] || fileData->symbols[n].type == STT_FILE)))
             continue;
         if (fileData->symbols[n].section[0] || fileData->symbols[n].type == STT_FILE) {
