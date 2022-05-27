@@ -14,6 +14,8 @@ int	ft_strcmp(const char *str1, const char *str2)
 {
 	int					n;
 
+	if (!str1 || !str2)
+		return (-1);
 	n = 0;
 	while (str1[n] == str2[n] && (str1[n] != '\0' || str2[n] != '\0'))
 		n++;

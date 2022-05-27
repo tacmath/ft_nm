@@ -53,7 +53,7 @@ char getSymbolChar(t_sym symbol) {
     }
     if (symbol.type == STT_COMMON)
         return ('C');
-    if (symbol.type == STT_NOTYPE || symbol.type < STT_NUM) {
+    if (!symbol.section[0]/*symbol.type == STT_NOTYPE || symbol.type < STT_NUM*/) {
         if (symbol.bind == STB_GLOBAL)
             return ('U');
         return ('u');
@@ -61,14 +61,17 @@ char getSymbolChar(t_sym symbol) {
     return ('?');
 }
 
-void printSymbols(t_fileData *fileData) {
+void printSymbols(t_fileData *fileData, t_option option) {
     int n;
     static char type[] = "   ";
     static char zeros[] = "0000000000000000";
 
-    n = -1;
+    n = 0;
     while (++n < fileData->symbols_nb) {
-        if (fileData->symbols[n].value) {
+        if ((option.u && fileData->symbols[n].section[0] || fileData->symbols[n].type == STT_FILE)
+            || (!option.a && !option.u && (!fileData->symbols[n].originalName[0] || fileData->symbols[n].type == STT_FILE)))
+            continue;
+        if (fileData->symbols[n].section[0] || fileData->symbols[n].type == STT_FILE) {
             write(1, zeros, 8 + (!fileData->type) * 8 - hexNbrLen(fileData->symbols[n].value));
             printHexNbr(fileData->symbols[n].value);
         }
@@ -76,7 +79,7 @@ void printSymbols(t_fileData *fileData) {
             write(1, "                ", 8 + (!fileData->type) * 8);
         type[1] = getSymbolChar(fileData->symbols[n]);
         write(1, type, 3);
-        write(1, fileData->symbols[n].name, ft_strlen(fileData->symbols[n].name));
+        write(1, fileData->symbols[n].name, ft_strlen(fileData->symbols[n].name));   
         write(1, "\n", 1);
     }
 }

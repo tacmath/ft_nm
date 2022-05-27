@@ -28,6 +28,7 @@ typedef struct s_data t_data;
 struct s_sym
 {
     char *name;
+    char *originalName;
     char *section;
     char   bind;
     char   type;
@@ -54,7 +55,6 @@ struct s_fileData
     Elf64_Ehdr  *head;
     Elf64_Shdr  *shead;
     Elf64_Sym   *symTab;
-    int         symTabSize;
     t_sym       *symbols;
     int         symbols_nb;
     char        *ShStrTab;
@@ -74,7 +74,7 @@ size_t      ft_strlen(const	char *str);
 int         fileErrors(char *preMessage, char *name, char *afterMessage);
 size_t      hexNbrLen(size_t nb);
 char        getSymbolChar(t_sym symbol);
-void        printSymbols(t_fileData *fileData);
+void        printSymbols(t_fileData *fileData, t_option option);
 int         getSymbols32(t_fileData *fileData);
 int         checkFileData32(t_fileData *fileData, char *name);
 

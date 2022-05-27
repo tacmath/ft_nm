@@ -34,12 +34,7 @@ int checkFileData64(t_fileData *fileData, char *name) {
     fileData->strTab = (void*)fileData->head + section->sh_offset;
     section = getShHead(fileData, ".symtab");
     fileData->symTab = (void*)fileData->head + section->sh_offset;
-    fileData->symTabSize = section->sh_size / sizeof(Elf64_Sym);
-    fileData->symbols_nb = 0;
-    n = -1;
-    while (++n < fileData->symTabSize)
-        if (fileData->symTab[n].st_name && ELF64_ST_TYPE(fileData->symTab[n].st_info) != STT_FILE)
-            fileData->symbols_nb++;
+    fileData->symbols_nb = section->sh_size / sizeof(Elf64_Sym);
     return (1);
 }
 
@@ -49,17 +44,19 @@ int getSymbols(t_fileData *fileData) {
 
     if (!(fileData->symbols = malloc(sizeof(t_sym) * fileData->symbols_nb)))
         return (0);
-    m = 0;
     n = -1;
-    while (++n < fileData->symTabSize) {
-        if (fileData->symTab[n].st_name && ELF64_ST_TYPE(fileData->symTab[n].st_info) != STT_FILE) {
-            fileData->symbols[m].name = &fileData->strTab[fileData->symTab[n].st_name];
-            fileData->symbols[m].bind = ELF64_ST_BIND(fileData->symTab[n].st_info);
-            fileData->symbols[m].type = ELF64_ST_TYPE(fileData->symTab[n].st_info);
-            fileData->symbols[m].value = fileData->symTab[n].st_value;
-            fileData->symbols[m].section = &fileData->ShStrTab[fileData->shead[fileData->symTab[n].st_shndx].sh_name];
-            m++;
-        }
+    while (++n < fileData->symbols_nb) {
+        fileData->symbols[n].name = &fileData->strTab[fileData->symTab[n].st_name];
+        fileData->symbols[n].originalName = fileData->symbols[n].name;
+        fileData->symbols[n].bind = ELF64_ST_BIND(fileData->symTab[n].st_info);
+        fileData->symbols[n].type = ELF64_ST_TYPE(fileData->symTab[n].st_info);
+        fileData->symbols[n].value = fileData->symTab[n].st_value;
+        if (fileData->symTab[n].st_shndx < fileData->head->e_shnum)
+            fileData->symbols[n].section = &fileData->ShStrTab[fileData->shead[fileData->symTab[n].st_shndx].sh_name];
+        else
+            fileData->symbols[n].section = &fileData->ShStrTab[fileData->shead[0].sh_name];
+        if (!fileData->symbols[n].name[0])
+            fileData->symbols[n].name = fileData->symbols[n].section;
     }
     return (1);
 }
@@ -91,7 +88,7 @@ int nmFile(char *name, t_option option, char mode) {
         else
             ft_quicksort(fileData.symbols, fileData.symbols_nb);
     }
-    printSymbols(&fileData);
+    printSymbols(&fileData, option);
     free(fileData.symbols);
     munmap(fileData.head, fileData.fileSize);
     return (1);
