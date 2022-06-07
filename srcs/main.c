@@ -23,18 +23,15 @@ int getFileData(t_fileData *fileData, char *name) {
 }
 
 int checkFileData64(t_fileData *fileData, char *name) {
-    Elf64_Shdr *section;
     int n;
 
     if (fileData->head->e_shoff + fileData->head->e_shnum * fileData->head->e_shentsize > fileData->fileSize)
         return (fileErrors(": ", name, ": File format not recognized\n"));
     fileData->shead = (void*)fileData->head + fileData->head->e_shoff;
     fileData->ShStrTab = (void*)fileData->head + fileData->shead[fileData->head->e_shstrndx].sh_offset;
-    section = getShHead(fileData, ".strtab");
-    fileData->strTab = (void*)fileData->head + section->sh_offset;
-    section = getShHead(fileData, ".symtab");
-    fileData->symTab = (void*)fileData->head + section->sh_offset;
-    fileData->symbols_nb = section->sh_size / sizeof(Elf64_Sym);
+    fileData->strTab = (void*)fileData->head + fileData->shead[fileData->head->e_shstrndx - 1].sh_offset;
+    fileData->symTab = (void*)fileData->head + fileData->shead[fileData->head->e_shstrndx - 2].sh_offset;
+    fileData->symbols_nb = fileData->shead[fileData->head->e_shstrndx - 2].sh_size / sizeof(Elf64_Sym);
     return (1);
 }
 

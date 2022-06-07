@@ -41,6 +41,8 @@ CFLAGS		= -Wall -Werror -Wextra
 all: $(NAME)
 
 $(NAME) : $(OBJS)
+	@export LC_COLLATE=C
+	@export LANG=en_US.UTF-8
 	@$(CC) $^ -o $@
 	@echo "	\033[2K\r$(DARK_BLUE)$(NAME):\t\t$(GREEN)loaded\033[0m"
 

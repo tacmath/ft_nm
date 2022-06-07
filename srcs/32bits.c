@@ -32,8 +32,6 @@ int getSymbols32(t_fileData *fileData) {
 int checkFileData32(t_fileData *fileData, char *name) {
 	Elf32_Ehdr *head;
     Elf32_Shdr *shead;
-    Elf32_Shdr *section;
-    Elf32_Sym *symTab;
     int n;
 
 	head = (Elf32_Ehdr *)fileData->head;
@@ -42,10 +40,9 @@ int checkFileData32(t_fileData *fileData, char *name) {
     fileData->shead = (void*)head + head->e_shoff;
     shead = (Elf32_Shdr *)fileData->shead;
     fileData->ShStrTab = (void*)head + shead[head->e_shstrndx].sh_offset;
-    section = getShHead32(fileData, ".strtab");
-    fileData->strTab = (void*)head + section->sh_offset;
-    section = getShHead32(fileData, ".symtab");
-    fileData->symTab = (void*)head + section->sh_offset;
-    fileData->symbols_nb = section->sh_size / sizeof(Elf32_Sym);
+    fileData->ShStrTab = (void*)fileData->head + shead[head->e_shstrndx].sh_offset;
+    fileData->strTab = (void*)fileData->head + shead[head->e_shstrndx - 1].sh_offset;
+    fileData->symTab = (void*)fileData->head + shead[head->e_shstrndx - 2].sh_offset;
+    fileData->symbols_nb = shead[head->e_shstrndx - 2].sh_size / sizeof(Elf32_Sym);
     return (1);
 }
