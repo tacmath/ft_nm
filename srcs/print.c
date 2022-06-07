@@ -34,7 +34,7 @@ char checkSymbolType(t_sym symbol, char **sections, char global, char local) {
 }
 
 char getSymbolChar(t_sym symbol) {
-    static char *dataSections[9] = {".data", ".jcr", ".dynamic", ".got", ".got.plt", ".init_array", ".fini_array", 0};
+    static char *dataSections[12] = {".data", ".jcr", ".dynamic", ".got", ".got.plt", ".init_array", ".fini_array", 0};
     static char *rdataSections[19] = {".rodata", ".eh_frame", ".eh_frame_hdr", ".dynstr", ".dynsym", ".gnu.hash", ".gnu.version",
                                         ".gnu.version_r", ".rela.dyn", ".rela.plt", ".note.ABI-tag", ".note.gnu.build-id", ".interp", 
                                         ".rel.dyn", ".rel.plt", ".hash", 0};
