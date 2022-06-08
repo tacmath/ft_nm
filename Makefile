@@ -22,7 +22,7 @@ INC_PATH= includes/
 
 HEADER=$(INC_PATH)/ft_nm.h
 
-NAME_SRC=main.c get_shname.c utils.c print.c 32bits.c
+NAME_SRC=main.c utils.c print.c 32bits.c
 
 
 

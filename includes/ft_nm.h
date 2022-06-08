@@ -64,8 +64,6 @@ struct s_fileData
 
 typedef struct s_fileData t_fileData;
 
-Elf64_Shdr  *getShHead(t_fileData *fileData, char *name);
-Elf32_Shdr  *getShHead32(t_fileData *fileData, char *name);
 void        ft_bzero(void *s, size_t n);
 void		ft_quicksort(t_sym *tab, int len);
 void		ft_rquicksort(t_sym *tab, int len);

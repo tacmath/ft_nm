@@ -43,6 +43,8 @@ int checkFileData32(t_fileData *fileData, char *name) {
     fileData->ShStrTab = (void*)fileData->head + shead[head->e_shstrndx].sh_offset;
     fileData->strTab = (void*)fileData->head + shead[head->e_shstrndx - 1].sh_offset;
     fileData->symTab = (void*)fileData->head + shead[head->e_shstrndx - 2].sh_offset;
+    if (ft_strcmp(&fileData->ShStrTab[shead[head->e_shstrndx - 2].sh_name], ".symtab"))
+        return (fileErrors(": ", name, ": no symbols\n"));
     fileData->symbols_nb = shead[head->e_shstrndx - 2].sh_size / sizeof(Elf32_Sym);
     return (1);
 }

@@ -31,6 +31,8 @@ int checkFileData64(t_fileData *fileData, char *name) {
     fileData->ShStrTab = (void*)fileData->head + fileData->shead[fileData->head->e_shstrndx].sh_offset;
     fileData->strTab = (void*)fileData->head + fileData->shead[fileData->head->e_shstrndx - 1].sh_offset;
     fileData->symTab = (void*)fileData->head + fileData->shead[fileData->head->e_shstrndx - 2].sh_offset;
+    if (ft_strcmp(&fileData->ShStrTab[fileData->shead[fileData->head->e_shstrndx - 2].sh_name], ".symtab"))
+        return (fileErrors(": ", name, ": no symbols\n"));
     fileData->symbols_nb = fileData->shead[fileData->head->e_shstrndx - 2].sh_size / sizeof(Elf64_Sym);
     return (1);
 }
@@ -81,9 +83,9 @@ int nmFile(char *name, t_option option, char mode) {
     }
     if (!option.p) {
         if (option.r)
-            ft_rquicksort(fileData.symbols, fileData.symbols_nb);
+            ft_rquicksort(fileData.symbols + 1, fileData.symbols_nb - 1);
         else
-            ft_quicksort(fileData.symbols, fileData.symbols_nb);
+            ft_quicksort(fileData.symbols + 1, fileData.symbols_nb - 1);
     }
     printSymbols(&fileData, option);
     free(fileData.symbols);

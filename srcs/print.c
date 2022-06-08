@@ -46,7 +46,7 @@ char getSymbolChar(t_sym symbol) {
             return ('W');
         return ('w');
     }
-    if (symbol.type == STT_FILE) {
+    if (symbol.type == STT_FILE || (symbol.type == STT_NOTYPE && !symbol.section[0])) {
         if (symbol.bind == STB_GLOBAL)
             return ('A');
         return ('a');
@@ -69,7 +69,7 @@ char getSymbolChar(t_sym symbol) {
         return (ret);
     if (symbol.type == STT_COMMON)
         return ('C');
-    if (!symbol.section[0]/*symbol.type == STT_NOTYPE || symbol.type < STT_NUM*/) {
+    if (!symbol.section[0]) {
         if (symbol.bind == STB_GLOBAL)
             return ('U');
         return ('u');
@@ -84,10 +84,12 @@ void printSymbols(t_fileData *fileData, t_option option) {
 
     n = 0;
     while (++n < fileData->symbols_nb) {
-        if ((option.u && (fileData->symbols[n].section[0] || fileData->symbols[n].type == STT_FILE))
-            || (!option.a && !option.u && (!fileData->symbols[n].originalName[0] || fileData->symbols[n].type == STT_FILE)))
+        if ((option.u && (fileData->symbols[n].section[0] || fileData->symbols[n].type == STT_FILE || (fileData->symbols[n].type == STT_NOTYPE && fileData->symbols[n].bind < STB_WEAK)))
+            || (!option.a && !option.u && (!fileData->symbols[n].originalName[0] || fileData->symbols[n].type == STT_FILE))
+            || option.g && fileData->symbols[n].bind != STB_GLOBAL && fileData->symbols[n].bind != STB_WEAK)
             continue;
-        if (fileData->symbols[n].section[0] || fileData->symbols[n].type == STT_FILE) {
+        if (fileData->symbols[n].section[0] || fileData->symbols[n].type == STT_FILE || (fileData->symbols[n].type == STT_NOTYPE
+            && fileData->symbols[n].bind < STB_WEAK && !fileData->symbols[n].section[0])) {
             write(1, zeros, 8 + (!fileData->type) * 8 - hexNbrLen(fileData->symbols[n].value));
             printHexNbr(fileData->symbols[n].value);
         }
