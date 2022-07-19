@@ -19,20 +19,6 @@ void printHexNbr(size_t nb) {
         write(1, hex + nb, 1);
 }
 
-char checkSymbolType(t_sym symbol, char **sections, char global, char local) {
-    int n;
-    
-    n = -1;
-    while (sections[++n]) {
-        if (!ft_strcmp(symbol.section, sections[n])) {
-            if (symbol.bind == STB_GLOBAL)
-                return (global);
-            return (local);
-        }
-    }
-    return (0);
-}
-
 char getSymbolChar(t_sym symbol) {
     char ret;
 
@@ -104,6 +90,5 @@ void printSymbols(t_fileData *fileData, t_option option) {
         write(1, type, 3);
         write(1, fileData->symbols[n].name, ft_strlen(fileData->symbols[n].name));   
         write(1, "\n", 1);
-   //     dprintf(1, "%d\n", fileData->symbols[n].shndx);
     }
 }
