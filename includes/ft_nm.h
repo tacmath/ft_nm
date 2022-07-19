@@ -30,6 +30,8 @@ struct s_sym
     char *name;
     char *originalName;
     char *section;
+    int   section_type;
+    int   section_flags;
     char   bind;
     char   type;
     size_t value;

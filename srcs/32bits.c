@@ -12,6 +12,7 @@ int getSymbols32(t_fileData *fileData) {
     shead = (Elf32_Shdr*)fileData->shead;
     if (!(fileData->symbols = malloc(sizeof(t_sym) * fileData->symbols_nb)))
         return (0);
+    ft_bzero(fileData->symbols, sizeof(t_sym) * fileData->symbols_nb);
     n = -1;
     while (++n < fileData->symbols_nb) {
         fileData->symbols[n].name = &fileData->strTab[symTab[n].st_name];
@@ -19,8 +20,11 @@ int getSymbols32(t_fileData *fileData) {
         fileData->symbols[n].bind = ELF32_ST_BIND(symTab[n].st_info);
         fileData->symbols[n].type = ELF32_ST_TYPE(symTab[n].st_info);
         fileData->symbols[n].value = symTab[n].st_value;
-        if (symTab[n].st_shndx < head->e_shnum)
+        if (symTab[n].st_shndx < head->e_shnum) {
             fileData->symbols[n].section = &fileData->ShStrTab[shead[symTab[n].st_shndx].sh_name];
+            fileData->symbols[n].section_type = shead[symTab[n].st_shndx].sh_type;
+            fileData->symbols[n].section_flags = shead[symTab[n].st_shndx].sh_flags;
+        }
         else
             fileData->symbols[n].section = &fileData->ShStrTab[shead[0].sh_name];
         if (!fileData->symbols[n].name[0])

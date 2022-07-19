@@ -43,6 +43,7 @@ int getSymbols(t_fileData *fileData) {
 
     if (!(fileData->symbols = malloc(sizeof(t_sym) * fileData->symbols_nb)))
         return (0);
+    ft_bzero(fileData->symbols, sizeof(t_sym) * fileData->symbols_nb);
     n = -1;
     while (++n < fileData->symbols_nb) {
         fileData->symbols[n].name = &fileData->strTab[fileData->symTab[n].st_name];
@@ -50,8 +51,11 @@ int getSymbols(t_fileData *fileData) {
         fileData->symbols[n].bind = ELF64_ST_BIND(fileData->symTab[n].st_info);
         fileData->symbols[n].type = ELF64_ST_TYPE(fileData->symTab[n].st_info);
         fileData->symbols[n].value = fileData->symTab[n].st_value;
-        if (fileData->symTab[n].st_shndx < fileData->head->e_shnum)
+        if (fileData->symTab[n].st_shndx < fileData->head->e_shnum) {
             fileData->symbols[n].section = &fileData->ShStrTab[fileData->shead[fileData->symTab[n].st_shndx].sh_name];
+            fileData->symbols[n].section_type = fileData->shead[fileData->symTab[n].st_shndx].sh_type;
+            fileData->symbols[n].section_flags = fileData->shead[fileData->symTab[n].st_shndx].sh_flags;
+        }
         else
             fileData->symbols[n].section = &fileData->ShStrTab[fileData->shead[0].sh_name];
         if (!fileData->symbols[n].name[0])
