@@ -20,6 +20,7 @@ int getSymbols32(t_fileData *fileData) {
         fileData->symbols[n].bind = ELF32_ST_BIND(symTab[n].st_info);
         fileData->symbols[n].type = ELF32_ST_TYPE(symTab[n].st_info);
         fileData->symbols[n].value = symTab[n].st_value;
+        fileData->symbols[n].shndx = symTab[n].st_shndx;
         if (symTab[n].st_shndx < head->e_shnum) {
             fileData->symbols[n].section = &fileData->ShStrTab[shead[symTab[n].st_shndx].sh_name];
             fileData->symbols[n].section_type = shead[symTab[n].st_shndx].sh_type;

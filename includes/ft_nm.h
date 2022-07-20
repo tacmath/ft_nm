@@ -32,6 +32,7 @@ struct s_sym
     char *section;
     int   section_type;
     int   section_flags;
+    int    shndx;
     char   bind;
     char   type;
     size_t value;
