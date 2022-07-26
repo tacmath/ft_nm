@@ -19,58 +19,41 @@ void printHexNbr(size_t nb) {
         write(1, hex + nb, 1);
 }
 
-char getSymbolChar(t_sym symbol) {
-    char ret;
+char getGlobalSymbol(t_sym symbol, char c) {
+    if (symbol.bind == STB_GLOBAL)
+        return (c - ('a' - 'A'));
+    return (c);
+}
 
+char getSymbolChar(t_sym symbol) {
+    if (symbol.bind == STB_WEAK && symbol.type == STT_OBJECT) {
+        if (symbol.shndx)
+            return ('V');
+        return ('v');
+    }
     if (symbol.bind == STB_WEAK) {
-        if (symbol.value)
+        if (symbol.shndx)
             return ('W');
         return ('w');
     }
-
     if (symbol.type == STT_GNU_IFUNC)
         return ('i');
-    
-    if (symbol.type == STT_FILE || !symbol.section[0] && symbol.shndx) {
-        if (symbol.bind == STB_GLOBAL)
-            return ('A');
-        return ('a');
-    }
-    if (symbol.section_type == SHT_NOBITS) {
-        if (symbol.bind == STB_GLOBAL)
-            return ('B');
-        return ('b');
-    }
-    if (symbol.section_flags == (SHF_MERGE | SHF_STRINGS) || (!symbol.section_flags && symbol.shndx)) {
-        if (symbol.bind == STB_GLOBAL)
-            return ('N');
-        return ('n');
-    }
-    if ((symbol.section_flags & SHF_EXECINSTR) || symbol.section_type == SHT_INIT_ARRAY
-        || symbol.section_type == SHT_FINI_ARRAY || symbol.section_type == SHT_PREINIT_ARRAY) {
-        if (symbol.bind == STB_GLOBAL)
-            return ('T');
-        return ('t');
-    }
-    if (symbol.section_flags == (SHF_WRITE | SHF_ALLOC) /* && (symbol.section_type == SHT_PROGBITS || symbol.section_type == SHT_DYNAMIC)*/) {
-        if (symbol.bind == STB_GLOBAL)
-            return ('D');
-        return ('d');
-    }
-    if ((symbol.section_flags & SHF_ALLOC)) {
-        if (symbol.bind == STB_GLOBAL)
-            return ('R');
-        return ('r');
-    }
+    if (symbol.type == STT_FILE || !symbol.section[0] && symbol.shndx)
+        return (getGlobalSymbol(symbol, 'a'));
+    if (symbol.section_type == SHT_NOBITS)
+        return (getGlobalSymbol(symbol, 'b'));
+    if (symbol.section_flags == (SHF_MERGE | SHF_STRINGS) || (!symbol.section_flags && symbol.shndx))
+        return (getGlobalSymbol(symbol, 'n'));
+    if ((symbol.section_flags & SHF_EXECINSTR))
+        return (getGlobalSymbol(symbol, 't'));
+    if (symbol.section_flags == (SHF_WRITE | SHF_ALLOC))
+        return (getGlobalSymbol(symbol, 'd'));
+    if ((symbol.section_flags & SHF_ALLOC))
+        return (getGlobalSymbol(symbol, 'r'));
     if (symbol.type == STT_COMMON)
         return ('C');
-
-
-    if (!symbol.shndx) {
-        if (symbol.bind == STB_GLOBAL)
-            return ('U');
-        return ('u');
-    }
+    if (!symbol.shndx)
+        return (getGlobalSymbol(symbol, 'u'));
     return ('?');
 }
 
@@ -81,12 +64,12 @@ void printSymbols(t_fileData *fileData, t_option option) {
 
     n = 0;
     while (++n < fileData->symbols_nb) {
-        if ((option.u && (fileData->symbols[n].shndx || fileData->symbols[n].type == STT_FILE || (fileData->symbols[n].type == STT_NOTYPE && fileData->symbols[n].bind < STB_WEAK)))
+        if ((option.u && (fileData->symbols[n].shndx || fileData->symbols[n].type == STT_FILE
+            || (fileData->symbols[n].type == STT_NOTYPE && fileData->symbols[n].bind < STB_WEAK)))
             || (!option.a && !option.u && (!fileData->symbols[n].originalName[0] || fileData->symbols[n].type == STT_FILE))
             || option.g && fileData->symbols[n].bind != STB_GLOBAL && fileData->symbols[n].bind != STB_WEAK)
             continue;
-        if (fileData->symbols[n].shndx || fileData->symbols[n].type == STT_FILE || (fileData->symbols[n].type == STT_NOTYPE
-            && fileData->symbols[n].bind < STB_WEAK && !fileData->symbols[n].shndx)) {
+        if (fileData->symbols[n].shndx || fileData->symbols[n].type == STT_FILE) {
             write(1, zeros, 8 + (!fileData->type) * 8 - hexNbrLen(fileData->symbols[n].value));
             printHexNbr(fileData->symbols[n].value);
         }
@@ -96,6 +79,5 @@ void printSymbols(t_fileData *fileData, t_option option) {
         write(1, type, 3);
         write(1, fileData->symbols[n].name, ft_strlen(fileData->symbols[n].name));   
         write(1, "\n", 1);
-       // dprintf(1, "    stype = %d flags = %d  type = %d  other = %d\n", fileData->symbols[n].section_type, fileData->symbols[n].section_flags, fileData->symbols[n].type, fileData->symbols[n].shndx);
     }
 }
