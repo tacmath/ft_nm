@@ -1,5 +1,4 @@
 #include "ft_nm.h"
-#include <stdio.h>
 
 int getFileData(t_fileData *fileData, char *name) {
     struct stat ret;
