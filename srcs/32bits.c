@@ -44,7 +44,6 @@ int checkFileData32(t_fileData *fileData, char *name) {
         return (fileErrors(": ", name, ": File format not recognized\n"));
     fileData->shead = (void*)head + head->e_shoff;
     shead = (Elf32_Shdr *)fileData->shead;
-    fileData->ShStrTab = (void*)head + shead[head->e_shstrndx].sh_offset;
     fileData->ShStrTab = (void*)fileData->head + shead[head->e_shstrndx].sh_offset;
     fileData->strTab = (void*)fileData->head + shead[head->e_shstrndx - 1].sh_offset;
     fileData->symTab = (void*)fileData->head + shead[head->e_shstrndx - 2].sh_offset;
